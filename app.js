@@ -10,7 +10,21 @@ app.use(cors());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
-mongoose.connect("mongodb://localhost:27017/test");
+mongoose.connect(process.env.MONGO_URI);
+
+if (process.env.NODE_ENV !== "production") {
+  mongoose.set("debug", true);
+  app.use(function (err, _, res, _) {
+    console.error(err.stack);
+    res.status(err.status || 500);
+    res.json({
+      errors: {
+        message: err.message,
+        error: err,
+      },
+    });
+  });
+}
 
 app.use("/", require("./routes/users"));
 
